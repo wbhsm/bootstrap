@@ -14,6 +14,7 @@ import {
   getTransitionDurationFromElement,
   getUID,
   isElement,
+  isRTL,
   noop,
   typeCheckConfig
 } from './util/index'
@@ -63,9 +64,9 @@ const DefaultType = {
 const AttachmentMap = {
   AUTO: 'auto',
   TOP: 'top',
-  RIGHT: 'right',
+  RIGHT: isRTL ? 'left' : 'right',
   BOTTOM: 'bottom',
-  LEFT: 'left'
+  LEFT: isRTL ? 'right' : 'left'
 }
 
 const Default = {
@@ -454,6 +455,18 @@ class Tooltip {
     return title
   }
 
+  updateAttachment(attachment) {
+    if (attachment === 'right') {
+      return 'end'
+    }
+
+    if (attachment === 'left') {
+      return 'start'
+    }
+
+    return attachment
+  }
+
   // Private
 
   _getPopperConfig(attachment) {
@@ -486,7 +499,7 @@ class Tooltip {
   }
 
   _addAttachmentClass(attachment) {
-    this.getTipElement().classList.add(`${CLASS_PREFIX}-${attachment}`)
+    this.getTipElement().classList.add(`${CLASS_PREFIX}-${this.updateAttachment(attachment)}`)
   }
 
   _getOffset() {
