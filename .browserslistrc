@@ -11,4 +11,5 @@ not Edge < 79
 Firefox ESR
 iOS >= 10
 Safari >= 10
+Android >= 6
 not Explorer <= 11
