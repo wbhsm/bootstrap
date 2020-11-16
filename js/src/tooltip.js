@@ -436,7 +436,7 @@ class Tooltip {
         content = sanitizeHtml(content, this.config.allowList, this.config.sanitizeFn)
       }
 
-      element.innerHTML = content
+      element.innerHTML = content // lgtm [js/xss-through-dom]
     } else {
       element.textContent = content
     }
