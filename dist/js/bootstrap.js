@@ -86,7 +86,7 @@
   };
 
   var getSelector = function getSelector(element) {
-    var selector = element.getAttribute('data-target');
+    var selector = element.getAttribute('data-bs-target');
 
     if (!selector || selector === '#') {
       var hrefAttr = element.getAttribute('href');
@@ -121,8 +121,8 @@
         transitionDuration = _window$getComputedSt.transitionDuration,
         transitionDelay = _window$getComputedSt.transitionDelay;
 
-    var floatTransitionDuration = parseFloat(transitionDuration);
-    var floatTransitionDelay = parseFloat(transitionDelay); // Return 0 if element or transition duration is not found
+    var floatTransitionDuration = Number.parseFloat(transitionDuration);
+    var floatTransitionDelay = Number.parseFloat(transitionDelay); // Return 0 if element or transition duration is not found
 
     if (!floatTransitionDuration && !floatTransitionDelay) {
       return 0;
@@ -131,7 +131,7 @@
 
     transitionDuration = transitionDuration.split(',')[0];
     transitionDelay = transitionDelay.split(',')[0];
-    return (parseFloat(transitionDuration) + parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER;
+    return (Number.parseFloat(transitionDuration) + Number.parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER;
   };
 
   var triggerTransitionEnd = function triggerTransitionEnd(element) {
@@ -221,12 +221,14 @@
     var _window = window,
         jQuery = _window.jQuery;
 
-    if (jQuery && !document.body.hasAttribute('data-no-jquery')) {
+    if (jQuery && !document.body.hasAttribute('data-bs-no-jquery')) {
       return jQuery;
     }
 
     return null;
   };
+
+  var isRTL = document.documentElement.dir === 'rtl';
 
   var onDOMContentLoaded = function onDOMContentLoaded(callback) {
     if (document.readyState === 'loading') {
@@ -325,7 +327,7 @@
     mouseenter: 'mouseover',
     mouseleave: 'mouseout'
   };
-  var nativeEvents = ['click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu', 'mousewheel', 'DOMMouseScroll', 'mouseover', 'mouseout', 'mousemove', 'selectstart', 'selectend', 'keydown', 'keypress', 'keyup', 'orientationchange', 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'pointerdown', 'pointermove', 'pointerup', 'pointerleave', 'pointercancel', 'gesturestart', 'gesturechange', 'gestureend', 'focus', 'blur', 'change', 'reset', 'select', 'submit', 'focusin', 'focusout', 'load', 'unload', 'beforeunload', 'resize', 'move', 'DOMContentLoaded', 'readystatechange', 'error', 'abort', 'scroll'];
+  var nativeEvents = new Set(['click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu', 'mousewheel', 'DOMMouseScroll', 'mouseover', 'mouseout', 'mousemove', 'selectstart', 'selectend', 'keydown', 'keypress', 'keyup', 'orientationchange', 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'pointerdown', 'pointermove', 'pointerup', 'pointerleave', 'pointercancel', 'gesturestart', 'gesturechange', 'gestureend', 'focus', 'blur', 'change', 'reset', 'select', 'submit', 'focusin', 'focusout', 'load', 'unload', 'beforeunload', 'resize', 'move', 'DOMContentLoaded', 'readystatechange', 'error', 'abort', 'scroll']);
   /**
    * ------------------------------------------------------------------------
    * Private methods
@@ -407,7 +409,7 @@
       typeEvent = custom;
     }
 
-    var isNative = nativeEvents.indexOf(typeEvent) > -1;
+    var isNative = nativeEvents.has(typeEvent);
 
     if (!isNative) {
       typeEvent = originalTypeEvent;
@@ -464,7 +466,7 @@
   function removeNamespacedHandlers(element, events, typeEvent, namespace) {
     var storeElementEvent = events[typeEvent] || {};
     Object.keys(storeElementEvent).forEach(function (handlerKey) {
-      if (handlerKey.indexOf(namespace) > -1) {
+      if (handlerKey.includes(namespace)) {
         var event = storeElementEvent[handlerKey];
         removeHandler(element, events, typeEvent, event.originalHandler, event.delegationSelector);
       }
@@ -490,7 +492,7 @@
 
       var inNamespace = typeEvent !== originalTypeEvent;
       var events = getEvent(element);
-      var isNamespace = originalTypeEvent.charAt(0) === '.';
+      var isNamespace = originalTypeEvent.startsWith('.');
 
       if (typeof originalHandler !== 'undefined') {
         // Simplest case: handler is passed, remove that listener ONLY.
@@ -512,7 +514,7 @@
       Object.keys(storeElementEvent).forEach(function (keyHandlers) {
         var handlerKey = keyHandlers.replace(stripUidRegex, '');
 
-        if (!inNamespace || originalTypeEvent.indexOf(handlerKey) > -1) {
+        if (!inNamespace || originalTypeEvent.includes(handlerKey)) {
           var event = storeElementEvent[keyHandlers];
           removeHandler(element, events, typeEvent, event.originalHandler, event.delegationSelector);
         }
@@ -526,7 +528,7 @@
       var $ = getjQuery();
       var typeEvent = event.replace(stripNameRegex, '');
       var inNamespace = event !== typeEvent;
-      var isNative = nativeEvents.indexOf(typeEvent) > -1;
+      var isNative = nativeEvents.has(typeEvent);
       var jQueryEvent;
       var bubbles = true;
       var nativeDispatch = true;
@@ -589,7 +591,7 @@
   var DATA_KEY = 'bs.alert';
   var EVENT_KEY = "." + DATA_KEY;
   var DATA_API_KEY = '.data-api';
-  var SELECTOR_DISMISS = '[data-dismiss="alert"]';
+  var SELECTOR_DISMISS = '[data-bs-dismiss="alert"]';
   var EVENT_CLOSE = "close" + EVENT_KEY;
   var EVENT_CLOSED = "closed" + EVENT_KEY;
   var EVENT_CLICK_DATA_API = "click" + EVENT_KEY + DATA_API_KEY;
@@ -748,7 +750,7 @@
   var EVENT_KEY$1 = "." + DATA_KEY$1;
   var DATA_API_KEY$1 = '.data-api';
   var CLASS_NAME_ACTIVE = 'active';
-  var SELECTOR_DATA_TOGGLE = '[data-toggle="button"]';
+  var SELECTOR_DATA_TOGGLE = '[data-bs-toggle="button"]';
   var EVENT_CLICK_DATA_API$1 = "click" + EVENT_KEY$1 + DATA_API_KEY$1;
   /**
    * ------------------------------------------------------------------------
@@ -889,10 +891,13 @@
         return {};
       }
 
-      var attributes = _extends({}, element.dataset);
-
-      Object.keys(attributes).forEach(function (key) {
-        attributes[key] = normalizeData(attributes[key]);
+      var attributes = {};
+      Object.keys(element.dataset).filter(function (key) {
+        return key.startsWith('bs');
+      }).forEach(function (key) {
+        var pureKey = key.replace(/^bs/, '');
+        pureKey = pureKey.charAt(0).toLowerCase() + pureKey.slice(1, pureKey.length);
+        attributes[pureKey] = normalizeData(element.dataset[key]);
       });
       return attributes;
     },
@@ -1050,8 +1055,8 @@
   var CLASS_NAME_CAROUSEL = 'carousel';
   var CLASS_NAME_ACTIVE$1 = 'active';
   var CLASS_NAME_SLIDE = 'slide';
-  var CLASS_NAME_RIGHT = 'carousel-item-right';
-  var CLASS_NAME_LEFT = 'carousel-item-left';
+  var CLASS_NAME_RIGHT = 'carousel-item-end';
+  var CLASS_NAME_LEFT = 'carousel-item-start';
   var CLASS_NAME_NEXT = 'carousel-item-next';
   var CLASS_NAME_PREV = 'carousel-item-prev';
   var CLASS_NAME_POINTER_EVENT = 'pointer-event';
@@ -1061,8 +1066,8 @@
   var SELECTOR_ITEM_IMG = '.carousel-item img';
   var SELECTOR_NEXT_PREV = '.carousel-item-next, .carousel-item-prev';
   var SELECTOR_INDICATORS = '.carousel-indicators';
-  var SELECTOR_DATA_SLIDE = '[data-slide], [data-slide-to]';
-  var SELECTOR_DATA_RIDE = '[data-ride="carousel"]';
+  var SELECTOR_DATA_SLIDE = '[data-bs-slide], [data-bs-slide-to]';
+  var SELECTOR_DATA_RIDE = '[data-bs-ride="carousel"]';
   var PointerType = {
     TOUCH: 'touch',
     PEN: 'pen'
@@ -1393,7 +1398,7 @@
         return;
       }
 
-      var elementInterval = parseInt(element.getAttribute('data-interval'), 10);
+      var elementInterval = Number.parseInt(element.getAttribute('data-bs-interval'), 10);
 
       if (elementInterval) {
         this._config.defaultInterval = this._config.defaultInterval || this._config.interval;
@@ -1538,7 +1543,7 @@
 
       var config = _extends({}, Manipulator.getDataAttributes(target), Manipulator.getDataAttributes(this));
 
-      var slideIndex = this.getAttribute('data-slide-to');
+      var slideIndex = this.getAttribute('data-bs-slide-to');
 
       if (slideIndex) {
         config.interval = false;
@@ -1640,7 +1645,7 @@
   var WIDTH = 'width';
   var HEIGHT = 'height';
   var SELECTOR_ACTIVES = '.show, .collapsing';
-  var SELECTOR_DATA_TOGGLE$1 = '[data-toggle="collapse"]';
+  var SELECTOR_DATA_TOGGLE$1 = '[data-bs-toggle="collapse"]';
   /**
    * ------------------------------------------------------------------------
    * Class Definition
@@ -1652,7 +1657,7 @@
       this._isTransitioning = false;
       this._element = element;
       this._config = this._getConfig(config);
-      this._triggerArray = SelectorEngine.find(SELECTOR_DATA_TOGGLE$1 + "[href=\"#" + element.id + "\"]," + (SELECTOR_DATA_TOGGLE$1 + "[data-target=\"#" + element.id + "\"]"));
+      this._triggerArray = SelectorEngine.find(SELECTOR_DATA_TOGGLE$1 + "[href=\"#" + element.id + "\"]," + (SELECTOR_DATA_TOGGLE$1 + "[data-bs-target=\"#" + element.id + "\"]"));
       var toggleList = SelectorEngine.find(SELECTOR_DATA_TOGGLE$1);
 
       for (var i = 0, len = toggleList.length; i < len; i++) {
@@ -1707,7 +1712,7 @@
       if (this._parent) {
         actives = SelectorEngine.find(SELECTOR_ACTIVES, this._parent).filter(function (elem) {
           if (typeof _this._config.parent === 'string') {
-            return elem.getAttribute('data-parent') === _this._config.parent;
+            return elem.getAttribute('data-bs-parent') === _this._config.parent;
           }
 
           return elem.classList.contains(CLASS_NAME_COLLAPSE);
@@ -1721,10 +1726,10 @@
       var container = SelectorEngine.findOne(this._selector);
 
       if (actives) {
-        var tempActiveData = actives.filter(function (elem) {
+        var tempActiveData = actives.find(function (elem) {
           return container !== elem;
         });
-        activesData = tempActiveData[0] ? Data.getData(tempActiveData[0], DATA_KEY$3) : null;
+        activesData = tempActiveData ? Data.getData(tempActiveData, DATA_KEY$3) : null;
 
         if (activesData && activesData._isTransitioning) {
           return;
@@ -1880,7 +1885,7 @@
         parent = SelectorEngine.findOne(parent);
       }
 
-      var selector = SELECTOR_DATA_TOGGLE$1 + "[data-parent=\"" + parent + "\"]";
+      var selector = SELECTOR_DATA_TOGGLE$1 + "[data-bs-parent=\"" + parent + "\"]";
       SelectorEngine.find(selector, parent).forEach(function (element) {
         var selected = getElementFromSelector(element);
 
@@ -2041,22 +2046,22 @@
   var CLASS_NAME_DISABLED = 'disabled';
   var CLASS_NAME_SHOW$1 = 'show';
   var CLASS_NAME_DROPUP = 'dropup';
-  var CLASS_NAME_DROPRIGHT = 'dropright';
-  var CLASS_NAME_DROPLEFT = 'dropleft';
-  var CLASS_NAME_MENURIGHT = 'dropdown-menu-right';
+  var CLASS_NAME_DROPRIGHT = 'dropend';
+  var CLASS_NAME_DROPLEFT = 'dropstart';
+  var CLASS_NAME_MENURIGHT = 'dropdown-menu-end';
   var CLASS_NAME_NAVBAR = 'navbar';
   var CLASS_NAME_POSITION_STATIC = 'position-static';
-  var SELECTOR_DATA_TOGGLE$2 = '[data-toggle="dropdown"]';
+  var SELECTOR_DATA_TOGGLE$2 = '[data-bs-toggle="dropdown"]';
   var SELECTOR_FORM_CHILD = '.dropdown form';
   var SELECTOR_MENU = '.dropdown-menu';
   var SELECTOR_NAVBAR_NAV = '.navbar-nav';
   var SELECTOR_VISIBLE_ITEMS = '.dropdown-menu .dropdown-item:not(.disabled):not(:disabled)';
-  var PLACEMENT_TOP = 'top-start';
-  var PLACEMENT_TOPEND = 'top-end';
-  var PLACEMENT_BOTTOM = 'bottom-start';
-  var PLACEMENT_BOTTOMEND = 'bottom-end';
-  var PLACEMENT_RIGHT = 'right-start';
-  var PLACEMENT_LEFT = 'left-start';
+  var PLACEMENT_TOP = isRTL ? 'top-end' : 'top-start';
+  var PLACEMENT_TOPEND = isRTL ? 'top-start' : 'top-end';
+  var PLACEMENT_BOTTOM = isRTL ? 'bottom-end' : 'bottom-start';
+  var PLACEMENT_BOTTOMEND = isRTL ? 'bottom-start' : 'bottom-end';
+  var PLACEMENT_RIGHT = isRTL ? 'left-start' : 'right-start';
+  var PLACEMENT_LEFT = isRTL ? 'right-start' : 'left-start';
   var Default$2 = {
     offset: 0,
     flip: true,
@@ -2531,6 +2536,7 @@
   var EVENT_KEY$5 = "." + DATA_KEY$5;
   var DATA_API_KEY$5 = '.data-api';
   var ESCAPE_KEY$1 = 'Escape';
+  var isLTR = !isRTL;
   var Default$3 = {
     backdrop: true,
     keyboard: true,
@@ -2563,8 +2569,8 @@
   var CLASS_NAME_STATIC = 'modal-static';
   var SELECTOR_DIALOG = '.modal-dialog';
   var SELECTOR_MODAL_BODY = '.modal-body';
-  var SELECTOR_DATA_TOGGLE$3 = '[data-toggle="modal"]';
-  var SELECTOR_DATA_DISMISS = '[data-dismiss="modal"]';
+  var SELECTOR_DATA_TOGGLE$3 = '[data-bs-toggle="modal"]';
+  var SELECTOR_DATA_DISMISS = '[data-bs-dismiss="modal"]';
   var SELECTOR_FIXED_CONTENT = '.fixed-top, .fixed-bottom, .is-fixed, .sticky-top';
   var SELECTOR_STICKY_CONTENT = '.sticky-top';
   /**
@@ -2958,11 +2964,11 @@
     _proto._adjustDialog = function _adjustDialog() {
       var isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
 
-      if (!this._isBodyOverflowing && isModalOverflowing) {
+      if (!this._isBodyOverflowing && isModalOverflowing && isLTR || this._isBodyOverflowing && !isModalOverflowing && isRTL) {
         this._element.style.paddingLeft = this._scrollbarWidth + "px";
       }
 
-      if (this._isBodyOverflowing && !isModalOverflowing) {
+      if (this._isBodyOverflowing && !isModalOverflowing && isLTR || !this._isBodyOverflowing && isModalOverflowing && isRTL) {
         this._element.style.paddingRight = this._scrollbarWidth + "px";
       }
     };
@@ -2988,21 +2994,21 @@
         SelectorEngine.find(SELECTOR_FIXED_CONTENT).forEach(function (element) {
           var actualPadding = element.style.paddingRight;
           var calculatedPadding = window.getComputedStyle(element)['padding-right'];
-          Manipulator.setDataAttribute(element, 'padding-right', actualPadding);
-          element.style.paddingRight = parseFloat(calculatedPadding) + _this10._scrollbarWidth + "px";
+          Manipulator.setDataAttribute(element, 'bs-padding-right', actualPadding);
+          element.style.paddingRight = Number.parseFloat(calculatedPadding) + _this10._scrollbarWidth + "px";
         }); // Adjust sticky content margin
 
         SelectorEngine.find(SELECTOR_STICKY_CONTENT).forEach(function (element) {
           var actualMargin = element.style.marginRight;
           var calculatedMargin = window.getComputedStyle(element)['margin-right'];
-          Manipulator.setDataAttribute(element, 'margin-right', actualMargin);
-          element.style.marginRight = parseFloat(calculatedMargin) - _this10._scrollbarWidth + "px";
+          Manipulator.setDataAttribute(element, 'bs-margin-right', actualMargin);
+          element.style.marginRight = Number.parseFloat(calculatedMargin) - _this10._scrollbarWidth + "px";
         }); // Adjust body padding
 
         var actualPadding = document.body.style.paddingRight;
         var calculatedPadding = window.getComputedStyle(document.body)['padding-right'];
-        Manipulator.setDataAttribute(document.body, 'padding-right', actualPadding);
-        document.body.style.paddingRight = parseFloat(calculatedPadding) + this._scrollbarWidth + "px";
+        Manipulator.setDataAttribute(document.body, 'bs-padding-right', actualPadding);
+        document.body.style.paddingRight = Number.parseFloat(calculatedPadding) + this._scrollbarWidth + "px";
       }
 
       document.body.classList.add(CLASS_NAME_OPEN);
@@ -3011,29 +3017,29 @@
     _proto._resetScrollbar = function _resetScrollbar() {
       // Restore fixed content padding
       SelectorEngine.find(SELECTOR_FIXED_CONTENT).forEach(function (element) {
-        var padding = Manipulator.getDataAttribute(element, 'padding-right');
+        var padding = Manipulator.getDataAttribute(element, 'bs-padding-right');
 
         if (typeof padding !== 'undefined') {
-          Manipulator.removeDataAttribute(element, 'padding-right');
+          Manipulator.removeDataAttribute(element, 'bs-padding-right');
           element.style.paddingRight = padding;
         }
       }); // Restore sticky content and navbar-toggler margin
 
       SelectorEngine.find("" + SELECTOR_STICKY_CONTENT).forEach(function (element) {
-        var margin = Manipulator.getDataAttribute(element, 'margin-right');
+        var margin = Manipulator.getDataAttribute(element, 'bs-margin-right');
 
         if (typeof margin !== 'undefined') {
-          Manipulator.removeDataAttribute(element, 'margin-right');
+          Manipulator.removeDataAttribute(element, 'bs-margin-right');
           element.style.marginRight = margin;
         }
       }); // Restore body padding
 
-      var padding = Manipulator.getDataAttribute(document.body, 'padding-right');
+      var padding = Manipulator.getDataAttribute(document.body, 'bs-padding-right');
 
       if (typeof padding === 'undefined') {
         document.body.style.paddingRight = '';
       } else {
-        Manipulator.removeDataAttribute(document.body, 'padding-right');
+        Manipulator.removeDataAttribute(document.body, 'bs-padding-right');
         document.body.style.paddingRight = padding;
       }
     };
@@ -3156,7 +3162,7 @@
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
-  var uriAttrs = ['background', 'cite', 'href', 'itemtype', 'longdesc', 'poster', 'src', 'xlink:href'];
+  var uriAttrs = new Set(['background', 'cite', 'href', 'itemtype', 'longdesc', 'poster', 'src', 'xlink:href']);
   var ARIA_ATTRIBUTE_PATTERN = /^aria-[\w-]*$/i;
   /**
    * A pattern that recognizes a commonly useful subset of URLs that are safe.
@@ -3176,8 +3182,8 @@
   var allowedAttribute = function allowedAttribute(attr, allowedAttributeList) {
     var attrName = attr.nodeName.toLowerCase();
 
-    if (allowedAttributeList.indexOf(attrName) !== -1) {
-      if (uriAttrs.indexOf(attrName) !== -1) {
+    if (allowedAttributeList.includes(attrName)) {
+      if (uriAttrs.has(attrName)) {
         return Boolean(attr.nodeValue.match(SAFE_URL_PATTERN) || attr.nodeValue.match(DATA_URL_PATTERN));
       }
 
@@ -3253,7 +3259,7 @@
       var el = elements[i];
       var elName = el.nodeName.toLowerCase();
 
-      if (allowlistKeys.indexOf(elName) === -1) {
+      if (!allowlistKeys.includes(elName)) {
         el.parentNode.removeChild(el);
         return "continue";
       }
@@ -3289,7 +3295,7 @@
   var EVENT_KEY$6 = "." + DATA_KEY$6;
   var CLASS_PREFIX = 'bs-tooltip';
   var BSCLS_PREFIX_REGEX = new RegExp("(^|\\s)" + CLASS_PREFIX + "\\S+", 'g');
-  var DISALLOWED_ATTRIBUTES = ['sanitize', 'allowList', 'sanitizeFn'];
+  var DISALLOWED_ATTRIBUTES = new Set(['sanitize', 'allowList', 'sanitizeFn']);
   var DefaultType$4 = {
     animation: 'boolean',
     template: 'string',
@@ -3311,9 +3317,9 @@
   var AttachmentMap = {
     AUTO: 'auto',
     TOP: 'top',
-    RIGHT: 'right',
+    RIGHT: isRTL ? 'left' : 'right',
     BOTTOM: 'bottom',
-    LEFT: 'left'
+    LEFT: isRTL ? 'right' : 'left'
   };
   var Default$4 = {
     animation: true,
@@ -3653,13 +3659,25 @@
     };
 
     _proto.getTitle = function getTitle() {
-      var title = this.element.getAttribute('data-original-title');
+      var title = this.element.getAttribute('data-bs-original-title');
 
       if (!title) {
         title = typeof this.config.title === 'function' ? this.config.title.call(this.element) : this.config.title;
       }
 
       return title;
+    };
+
+    _proto.updateAttachment = function updateAttachment(attachment) {
+      if (attachment === 'right') {
+        return 'end';
+      }
+
+      if (attachment === 'left') {
+        return 'start';
+      }
+
+      return attachment;
     } // Private
     ;
 
@@ -3693,7 +3711,7 @@
     };
 
     _proto._addAttachmentClass = function _addAttachmentClass(attachment) {
-      this.getTipElement().classList.add(CLASS_PREFIX + "-" + attachment);
+      this.getTipElement().classList.add(CLASS_PREFIX + "-" + this.updateAttachment(attachment));
     };
 
     _proto._getOffset = function _getOffset() {
@@ -3769,10 +3787,11 @@
     };
 
     _proto._fixTitle = function _fixTitle() {
-      var titleType = typeof this.element.getAttribute('data-original-title');
+      var title = this.element.getAttribute('title');
+      var originalTitleType = typeof this.element.getAttribute('data-bs-original-title');
 
-      if (this.element.getAttribute('title') || titleType !== 'string') {
-        this.element.setAttribute('data-original-title', this.element.getAttribute('title') || '');
+      if (title || originalTitleType !== 'string') {
+        this.element.setAttribute('data-bs-original-title', title || '');
         this.element.setAttribute('title', '');
       }
     };
@@ -3855,7 +3874,7 @@
     _proto._getConfig = function _getConfig(config) {
       var dataAttributes = Manipulator.getDataAttributes(this.element);
       Object.keys(dataAttributes).forEach(function (dataAttr) {
-        if (DISALLOWED_ATTRIBUTES.indexOf(dataAttr) !== -1) {
+        if (DISALLOWED_ATTRIBUTES.has(dataAttr)) {
           delete dataAttributes[dataAttr];
         }
       });
@@ -4109,11 +4128,11 @@
     ;
 
     _proto._addAttachmentClass = function _addAttachmentClass(attachment) {
-      this.getTipElement().classList.add(CLASS_PREFIX$1 + "-" + attachment);
+      this.getTipElement().classList.add(CLASS_PREFIX$1 + "-" + this.updateAttachment(attachment));
     };
 
     _proto._getContent = function _getContent() {
-      return this.element.getAttribute('data-content') || this.config.content;
+      return this.element.getAttribute('data-bs-content') || this.config.content;
     };
 
     _proto._cleanTipClass = function _cleanTipClass() {
@@ -4249,7 +4268,7 @@
   var EVENT_LOAD_DATA_API$1 = "load" + EVENT_KEY$8 + DATA_API_KEY$6;
   var CLASS_NAME_DROPDOWN_ITEM = 'dropdown-item';
   var CLASS_NAME_ACTIVE$2 = 'active';
-  var SELECTOR_DATA_SPY = '[data-spy="scroll"]';
+  var SELECTOR_DATA_SPY = '[data-bs-spy="scroll"]';
   var SELECTOR_NAV_LIST_GROUP = '.nav, .list-group';
   var SELECTOR_NAV_LINKS = '.nav-link';
   var SELECTOR_NAV_ITEMS = '.nav-item';
@@ -4412,7 +4431,7 @@
       this._clear();
 
       var queries = this._selector.split(',').map(function (selector) {
-        return selector + "[data-target=\"" + target + "\"]," + selector + "[href=\"" + target + "\"]";
+        return selector + "[data-bs-target=\"" + target + "\"]," + selector + "[href=\"" + target + "\"]";
       });
 
       var link = SelectorEngine.findOne(queries.join(','));
@@ -4550,7 +4569,7 @@
   var SELECTOR_NAV_LIST_GROUP$1 = '.nav, .list-group';
   var SELECTOR_ACTIVE$1 = '.active';
   var SELECTOR_ACTIVE_UL = ':scope > li > .active';
-  var SELECTOR_DATA_TOGGLE$4 = '[data-toggle="tab"], [data-toggle="pill"], [data-toggle="list"]';
+  var SELECTOR_DATA_TOGGLE$4 = '[data-bs-toggle="tab"], [data-bs-toggle="pill"], [data-bs-toggle="list"]';
   var SELECTOR_DROPDOWN_TOGGLE$1 = '.dropdown-toggle';
   var SELECTOR_DROPDOWN_ACTIVE_CHILD = ':scope > .dropdown-menu .active';
   /**
@@ -4783,7 +4802,7 @@
     autohide: true,
     delay: 5000
   };
-  var SELECTOR_DATA_DISMISS$1 = '[data-dismiss="toast"]';
+  var SELECTOR_DATA_DISMISS$1 = '[data-bs-dismiss="toast"]';
   /**
    * ------------------------------------------------------------------------
    * Class Definition

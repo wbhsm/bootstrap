@@ -34,7 +34,7 @@
   };
 
   var getSelector = function getSelector(element) {
-    var selector = element.getAttribute('data-target');
+    var selector = element.getAttribute('data-bs-target');
 
     if (!selector || selector === '#') {
       var hrefAttr = element.getAttribute('href');
@@ -59,8 +59,8 @@
         transitionDuration = _window$getComputedSt.transitionDuration,
         transitionDelay = _window$getComputedSt.transitionDelay;
 
-    var floatTransitionDuration = parseFloat(transitionDuration);
-    var floatTransitionDelay = parseFloat(transitionDelay); // Return 0 if element or transition duration is not found
+    var floatTransitionDuration = Number.parseFloat(transitionDuration);
+    var floatTransitionDelay = Number.parseFloat(transitionDelay); // Return 0 if element or transition duration is not found
 
     if (!floatTransitionDuration && !floatTransitionDelay) {
       return 0;
@@ -69,7 +69,7 @@
 
     transitionDuration = transitionDuration.split(',')[0];
     transitionDelay = transitionDelay.split(',')[0];
-    return (parseFloat(transitionDuration) + parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER;
+    return (Number.parseFloat(transitionDuration) + Number.parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER;
   };
 
   var triggerTransitionEnd = function triggerTransitionEnd(element) {
@@ -132,12 +132,14 @@
     var _window = window,
         jQuery = _window.jQuery;
 
-    if (jQuery && !document.body.hasAttribute('data-no-jquery')) {
+    if (jQuery && !document.body.hasAttribute('data-bs-no-jquery')) {
       return jQuery;
     }
 
     return null;
   };
+
+  var isRTL = document.documentElement.dir === 'rtl';
 
   var onDOMContentLoaded = function onDOMContentLoaded(callback) {
     if (document.readyState === 'loading') {
@@ -164,6 +166,7 @@
   var EVENT_KEY = "." + DATA_KEY;
   var DATA_API_KEY = '.data-api';
   var ESCAPE_KEY = 'Escape';
+  var isLTR = !isRTL;
   var Default = {
     backdrop: true,
     keyboard: true,
@@ -196,8 +199,8 @@
   var CLASS_NAME_STATIC = 'modal-static';
   var SELECTOR_DIALOG = '.modal-dialog';
   var SELECTOR_MODAL_BODY = '.modal-body';
-  var SELECTOR_DATA_TOGGLE = '[data-toggle="modal"]';
-  var SELECTOR_DATA_DISMISS = '[data-dismiss="modal"]';
+  var SELECTOR_DATA_TOGGLE = '[data-bs-toggle="modal"]';
+  var SELECTOR_DATA_DISMISS = '[data-bs-dismiss="modal"]';
   var SELECTOR_FIXED_CONTENT = '.fixed-top, .fixed-bottom, .is-fixed, .sticky-top';
   var SELECTOR_STICKY_CONTENT = '.sticky-top';
   /**
@@ -591,11 +594,11 @@
     _proto._adjustDialog = function _adjustDialog() {
       var isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
 
-      if (!this._isBodyOverflowing && isModalOverflowing) {
+      if (!this._isBodyOverflowing && isModalOverflowing && isLTR || this._isBodyOverflowing && !isModalOverflowing && isRTL) {
         this._element.style.paddingLeft = this._scrollbarWidth + "px";
       }
 
-      if (this._isBodyOverflowing && !isModalOverflowing) {
+      if (this._isBodyOverflowing && !isModalOverflowing && isLTR || !this._isBodyOverflowing && isModalOverflowing && isRTL) {
         this._element.style.paddingRight = this._scrollbarWidth + "px";
       }
     };
@@ -621,21 +624,21 @@
         SelectorEngine__default['default'].find(SELECTOR_FIXED_CONTENT).forEach(function (element) {
           var actualPadding = element.style.paddingRight;
           var calculatedPadding = window.getComputedStyle(element)['padding-right'];
-          Manipulator__default['default'].setDataAttribute(element, 'padding-right', actualPadding);
-          element.style.paddingRight = parseFloat(calculatedPadding) + _this10._scrollbarWidth + "px";
+          Manipulator__default['default'].setDataAttribute(element, 'bs-padding-right', actualPadding);
+          element.style.paddingRight = Number.parseFloat(calculatedPadding) + _this10._scrollbarWidth + "px";
         }); // Adjust sticky content margin
 
         SelectorEngine__default['default'].find(SELECTOR_STICKY_CONTENT).forEach(function (element) {
           var actualMargin = element.style.marginRight;
           var calculatedMargin = window.getComputedStyle(element)['margin-right'];
-          Manipulator__default['default'].setDataAttribute(element, 'margin-right', actualMargin);
-          element.style.marginRight = parseFloat(calculatedMargin) - _this10._scrollbarWidth + "px";
+          Manipulator__default['default'].setDataAttribute(element, 'bs-margin-right', actualMargin);
+          element.style.marginRight = Number.parseFloat(calculatedMargin) - _this10._scrollbarWidth + "px";
         }); // Adjust body padding
 
         var actualPadding = document.body.style.paddingRight;
         var calculatedPadding = window.getComputedStyle(document.body)['padding-right'];
-        Manipulator__default['default'].setDataAttribute(document.body, 'padding-right', actualPadding);
-        document.body.style.paddingRight = parseFloat(calculatedPadding) + this._scrollbarWidth + "px";
+        Manipulator__default['default'].setDataAttribute(document.body, 'bs-padding-right', actualPadding);
+        document.body.style.paddingRight = Number.parseFloat(calculatedPadding) + this._scrollbarWidth + "px";
       }
 
       document.body.classList.add(CLASS_NAME_OPEN);
@@ -644,29 +647,29 @@
     _proto._resetScrollbar = function _resetScrollbar() {
       // Restore fixed content padding
       SelectorEngine__default['default'].find(SELECTOR_FIXED_CONTENT).forEach(function (element) {
-        var padding = Manipulator__default['default'].getDataAttribute(element, 'padding-right');
+        var padding = Manipulator__default['default'].getDataAttribute(element, 'bs-padding-right');
 
         if (typeof padding !== 'undefined') {
-          Manipulator__default['default'].removeDataAttribute(element, 'padding-right');
+          Manipulator__default['default'].removeDataAttribute(element, 'bs-padding-right');
           element.style.paddingRight = padding;
         }
       }); // Restore sticky content and navbar-toggler margin
 
       SelectorEngine__default['default'].find("" + SELECTOR_STICKY_CONTENT).forEach(function (element) {
-        var margin = Manipulator__default['default'].getDataAttribute(element, 'margin-right');
+        var margin = Manipulator__default['default'].getDataAttribute(element, 'bs-margin-right');
 
         if (typeof margin !== 'undefined') {
-          Manipulator__default['default'].removeDataAttribute(element, 'margin-right');
+          Manipulator__default['default'].removeDataAttribute(element, 'bs-margin-right');
           element.style.marginRight = margin;
         }
       }); // Restore body padding
 
-      var padding = Manipulator__default['default'].getDataAttribute(document.body, 'padding-right');
+      var padding = Manipulator__default['default'].getDataAttribute(document.body, 'bs-padding-right');
 
       if (typeof padding === 'undefined') {
         document.body.style.paddingRight = '';
       } else {
-        Manipulator__default['default'].removeDataAttribute(document.body, 'padding-right');
+        Manipulator__default['default'].removeDataAttribute(document.body, 'bs-padding-right');
         document.body.style.paddingRight = padding;
       }
     };
